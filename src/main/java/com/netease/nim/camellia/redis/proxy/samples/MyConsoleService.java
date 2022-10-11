@@ -28,14 +28,14 @@ public class MyConsoleService extends ConsoleServiceAdaptor implements Initializ
 
     @Override
     public ConsoleResult online() {
-        //TODO register to 注册中心，或者挂载到负载均衡服务器
+        //TODO register to registry, or mount to load balancing server
         zkRegisterBoot.register();
         return super.online();
     }
 
     @Override
     public ConsoleResult offline() {
-        //TODO deregister from 注册中心，或者从负载均衡服务器上摘掉
+        //TODO deregister from the registry, or remove it from the load balancing server
         zkRegisterBoot.deregister();
         return super.offline();
     }
