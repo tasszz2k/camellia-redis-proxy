@@ -1,7 +1,6 @@
-
-### 动态配置
-如果你希望你的proxy的路由配置可以动态变更，比如本来路由到redisA，然后动态的切换成redisB，那么你需要一个额外的配置文件，并且在application.yml中引用，如下：
-```yaml
+### Dynamic configuration
+If you want the routing configuration of your proxy to be dynamically changed, such as originally routed to redisA, and then dynamically switched to redisB, then you need an additional configuration file and reference it in application.yml, as follows:
+````yaml
 server:
   port: 6380
 spring:
@@ -17,13 +16,13 @@ camellia-redis-proxy:
       dynamic: true
       check-interval-millis: 3000
       json-file: resource-table.json
-```
-上面的配置表示：
-* proxy的路由转发规则来自于一个配置文件（因为在文件里可以自定以配置双写、分片以及各种组合等，所以叫复杂的complex），叫resource-table.json
-* dynamic=true表示配置是动态更新的，此时proxy会定时检查resource-table.json文件是否有变更（默认5s间隔，上图配置了3s），如果有变更，则会重新reload
-* proxy默认会优先去classpath下寻找名称叫resource-table.json的配置文件
-* 此外，你也可以直接配置一个绝对路径，proxy会自动识别这种情况，如下：
-```yaml
+````
+The configuration above means:
+* The routing and forwarding rules of the proxy come from a configuration file (because the file can be customized to configure double writing, fragmentation and various combinations, so it is called a complex complex), called resource-table.json
+* dynamic=true means that the configuration is dynamically updated. At this time, the proxy will regularly check whether the resource-table.json file has changed (the default interval is 5s, and the above figure is configured with 3s). If there is a change, it will be reloaded again.
+* By default, the proxy will first go to the classpath to find a configuration file named resource-table.json
+* In addition, you can also directly configure an absolute path, the proxy will automatically recognize this situation, as follows:
+````yaml
 server:
   port: 6380
 spring:
@@ -39,4 +38,4 @@ camellia-redis-proxy:
       dynamic: true
       check-interval-millis: 3000
       json-file: /home/xxx/resource-table.json
-```
+````

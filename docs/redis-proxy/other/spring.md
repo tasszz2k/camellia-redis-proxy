@@ -1,5 +1,4 @@
+## How to use spring to manage bean generation
 
-## 如何使用spring管理bean生成
-
-* proxy的很多自定义入口（不管是plugin还是callback）都需要配置全类名  
-* proxy会优先从spring获取该类，如果获取不到，会调用全类名的无参构造方法来创建相关对象
+* Many custom entries of proxy (whether it is plugin or callback) need to configure the full class name
+* The proxy will first obtain the class from spring. If it cannot be obtained, it will call the no-argument constructor of the full class name to create the related object

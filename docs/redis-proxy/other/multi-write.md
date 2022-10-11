@@ -1,17 +1,16 @@
+## Several questions about double writing
 
-## 关于双写的若干问题
+### Supported double-write schemes
+* Through the routing configuration, the proxy can directly send the write command to redisA and redisB at the same time, or more redis clusters, we call it direct double write mode
+* You can send write commands to mq through the MqMultiWriteCommandInterceptor interceptor (default supports kafka, other types of mq can be extended by yourself), and deploy a proxy in consumption mode for asynchronous double writing, which we call MQ-based double writing mode
+* If there is a need for double writing of some keys and some double writing of keys, it can be implemented through the MultiWriteCommandInterceptor interceptor with a custom MultiWriteFunc, which we call the key-level custom double writing mode
 
-### 支持的双写方案
-* 通过路由配置可以由proxy直接把写命令同时发给redisA和redisB，或者更多的redis集群，我们称之为直接双写模式
-* 可以通过MqMultiWriteCommandInterceptor拦截器把写命令发送给mq（默认支持kafka，其他类型的mq可以自行扩展），并部署消费模式的proxy进行异步双写，我们称之为基于MQ的双写模式
-* 如果有部分key双写，部分key双写的需求，可以通过MultiWriteCommandInterceptor拦截器，搭配自定义MultiWriteFunc实现，我们称之为key级别的自定义双写模式
-
-备注，直接双写的三种模式：
+Note, there are three modes of direct double writing:
 #### first_resource_only
-表示如果配置的第一个写地址返回了，则立即返回给客户端，这是默认的模式
+Indicates that if the first write address configured is returned, it will be returned to the client immediately, which is the default mode
 #### all_resources_no_check
-表示需要配置的所有写地址都返回了，才返回给给客户端，返回的是第一个地址的返回结果，你可以这样配置来生效这种模式：
-```yaml
+Indicates that all write addresses that need to be configured are returned before they are returned to the client, and the return result of the first address is returned. You can configure this mode to take effect:
+````yaml
 camellia-redis-proxy:
   password: pass123
   transpond:
@@ -21,10 +20,10 @@ camellia-redis-proxy:
       json-file: resource-table.json
     redis-conf:
       multi-write-mode: all_resources_no_check
-```
+````
 #### all_resources_check_error
-表示需要配置的所有写地址都返回了，才返回给客户端，并且会校验是否所有地址都是返回的非error结果，如果是，则返回第一个地址的返回结果；否则返回第一个错误结果，你可以这样配置来生效这种模式：
-```yaml
+Indicates that all write addresses that need to be configured are returned before they are returned to the client, and it will check whether all addresses are returned non-error results. If so, the return result of the first address will be returned; otherwise, the first address will be returned. Error results, you can configure this mode to take effect:
+````yaml
 camellia-redis-proxy:
   password: pass123
   transpond:
@@ -34,27 +33,27 @@ camellia-redis-proxy:
       json-file: resource-table.json
     redis-conf:
       multi-write-mode: all_resources_check_error
-```  
+````
 
-### 双写延迟问题
-#### 直接双写模式
-* proxy同时和多个redis后端建立长链接，写命令同时写入（proxy是非阻塞模型）
-* 直接双写模式下，默认第一个redis后端返回成功即返回客户端写命令执行成功，此外还可以支持配置多个后端同时返回成功后再回复客户端写入成功，此时可以认为双写几乎没有延迟
-* 此外，1.0.44版本开始，支持单独监控每个后端redis的响应时间，业务可以使用该指标来判断双写模式的延迟（netty队列和tcp队列的延迟会反应在该指标上）
+### Double write delay problem
+#### Direct double write mode
+* The proxy establishes long links with multiple redis backends at the same time, and writes commands at the same time (proxy is a non-blocking model)
+* In the direct double-write mode, by default, the first redis backend returns success, that is, the client write command is executed successfully. In addition, it can support configuring multiple backends at the same time to return success and then reply to the client write successfully. At this time, it can be considered that Double write with almost no delay
+* In addition, starting from version 1.0.44, it supports to monitor the response time of each backend redis separately. Businesses can use this indicator to judge the delay of double write mode (the delay of netty queue and tcp queue will be reflected in this indicator)
 
-#### 基于MQ的双写模式
-* proxy只和其中一个redis后端建立长链接，写命令发给该redis后端同时，会一起发给MQ，跨机房的proxy会从MQ消费数据进行写命令的异步写入
-* 该模式下，如果需要监控双写的延迟问题，可以通过监控MQ本身的消费延迟情况来判断
+#### MQ-based double write mode
+* The proxy only establishes a long link with one of the redis backends. When the write command is sent to the redis backend, it will be sent to MQ together. The proxy across the computer room will consume data from MQ and write the write command asynchronously.
+* In this mode, if you need to monitor the delay of double writing, you can judge by monitoring the consumption delay of MQ itself
 
-#### 监控双写延迟的另外一个方法
-* 比如要通过proxy双写redisA和redisB，不管是直接双写模式还是基于MQ的双写模式，你可以通过一个监控脚本，定时给proxy发送一个写命令（如setex）
-* 随后立即直连redisA和redisB去get该key，如果get到了说明没有延迟，如果有一个没有get到，则触发等待和重试，直到获取到为止，从而计算出双写延迟的大小
+#### Another way to monitor double write latency
+* For example, to double-write redisA and redisB through proxy, whether it is direct double-write mode or MQ-based double-write mode, you can send a write command (such as setex) to proxy regularly through a monitoring script.
+* Then directly connect redisA and redisB to get the key. If the get arrives, it means there is no delay. If one is not get, it will trigger waiting and retry until it is obtained, so as to calculate the size of the double write delay
 
-### 双写可靠性
-* 因为redis本身不支持分布式事务，因此无法保证两个redis同时写入成功或者写入失败
-* 但是在直连双写模式下，因为和后端redis建立长链接，一般情况下不会出现部分成功，除非网络故障或者后端redis异常，或者proxy本身宕机
-* 在直连双写模式下，你还可以支持配置两个redis同时返回成功后再返回客户端成功，在这种模式下，对于客户端来说可以认为，如果写命令返回了成功，可以确保两个redis都写入成功
-* 在基于MQ的双写模式下，通过MQ来保证写命令的不丢失
+### Double write reliability
+* Because redis itself does not support distributed transactions, there is no guarantee that two redis can write successfully or fail at the same time
+* However, in the direct-connect double-write mode, due to the establishment of a long link with the back-end redis, there will be no partial success under normal circumstances, unless the network fails or the back-end redis is abnormal, or the proxy itself is down
+* In the direct-connect double-write mode, you can also support configuring two redis to return success at the same time and then return to the client successfully. In this mode, it can be considered for the client that if the write command returns successfully, it can be ensured Both redis are written successfully
+* In the MQ-based double-write mode, MQ is used to ensure that the write command is not lost
 
-### 双写一致性
-* 你可以通过一些工具，来判断多个redis集群的数据一致性，如redis-full-check，见：https://developer.aliyun.com/article/690463    
+### Double write consistency
+* You can use some tools to judge the data consistency of multiple redis clusters, such as redis-full-check, see: https://developer.aliyun.com/article/690463

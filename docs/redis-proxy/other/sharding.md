@@ -1,18 +1,17 @@
-
-## 自定义分片函数
-camellia-redis-proxy支持分片，你可以自定义分片函数，分片函数会计算出一个key的哈希值，和分片大小（bucketSize）取余后，得到该key所属的分片。  
-默认的分片函数是：
-```
+## custom sharding function
+camellia-redis-proxy supports sharding. You can customize the sharding function. The sharding function will calculate the hash value of a key and take the remainder of the shard size (bucketSize) to get the shard to which the key belongs.
+The default sharding function is:
+````
 com.netease.nim.camellia.core.client.env.DefaultShardingFunc
-```  
-默认的分片函数是不支持HashTag的，如果你想使用HashTag，可以使用如下两个分片函数：
-```
+````
+The default sharding function does not support HashTag. If you want to use HashTag, you can use the following two sharding functions:
+````
 com.netease.nim.camellia.core.client.env.CRC16HashTagShardingFunc
 com.netease.nim.camellia.core.client.env.DefaultHashTagShardingFunc
-```
-此外，你也可以继承com.netease.nim.camellia.core.client.env.AbstractSimpleShardingFunc实现自己想要的分片函数，类似于这样：
+````
+In addition, you can also inherit com.netease.nim.camellia.core.client.env.AbstractSimpleShardingFunc to implement your own desired sharding function, similar to this:
 
-```java
+````java
 package com.netease.nim.camellia.redis.proxy.samples;
 
 import com.netease.nim.camellia.core.client.env.AbstractSimpleShardingFunc;
@@ -30,9 +29,9 @@ public class CustomShardingFunc extends AbstractSimpleShardingFunc {
         return (h < 0) ? -h : h;
     }
 }
-```  
-然后在application.yml配置即可，类似于这样：
-```yaml
+````
+Then configure it in application.yml, similar to this:
+````yaml
 server:
   port: 6380
 spring:
@@ -48,4 +47,4 @@ camellia-redis-proxy:
       json-file: resource-table.json
     redis-conf:
       sharding-func: com.xxx.CustomShardingFunc
-```
+````

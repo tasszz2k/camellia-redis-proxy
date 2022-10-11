@@ -1,50 +1,49 @@
+## Plugin system
+* Starting from version 1.1.x, functions such as monitoring, big key, hot key, etc. have been reconstructed and unified as part of the plug-in system. Users can introduce built-in plug-ins as needed through simple configuration
+* Plugins use a unified interface to intercept and control requests and responses
+* The proxy has many built-in plug-ins, which can be used directly after simple configuration
+* You can also implement custom plugins
 
-## 插件体系
-* 1.1.x版本开始，重构了监控、大key、热key等功能，统一作为插件化体系的一部分，用户可以通过简单的配置按需引入内置的插件
-* 插件使用统一的接口来拦截和控制请求和响应
-* proxy内置了很多插件，可以通过简单配置后即可直接使用
-* 你也可以实现自定义插件
-
-### 插件接口
-```java
+### Plugin interface
+````java
 public interface ProxyPlugin {
 
     /**
-     * 初始化方法
+     * initialization method
      */
     default void init(ProxyBeanFactory factory) {
     }
 
     /**
-     * 从大到小依次执行，请求和响应可以分开定义
-     * @return 优先级
+     * Execute in order from large to small, request and response can be defined separately
+     * @return priority
      */
     default ProxyPluginOrder order() {
         return ProxyPluginOrder.DEFAULT;
     }
 
     /**
-     * 请求（此时命令刚到proxy，还未到后端redis）
-     * @param request 请求command的上下文
+     * Request (the command has just arrived at the proxy at this time, but not yet at the backend redis)
+     * @param request the context of the request command
      */
     default ProxyPluginResponse executeRequest(ProxyRequest request) {
         return ProxyPluginResponse.SUCCESS;
     }
 
     /**
-     * 响应（此时命令已经从后端redis响应，即将返回给客户端）
-     * @param reply 响应reply上下文
+     * Response (at this time the command has been responded from the backend redis and will be returned to the client)
+     * @param reply response reply context
      */
     default ProxyPluginResponse executeReply(ProxyReply reply) {
         return ProxyPluginResponse.SUCCESS;
     }
 
 }
-```
+````
 
-### 如何启用插件
+### How to enable plugins
 * application.yml
-```yaml
+````yaml
 server:
   port: 6380
 spring:
@@ -52,50 +51,50 @@ spring:
     name: camellia-redis-proxy-server
 
 camellia-redis-proxy:
-  console-port: 16379 #console端口，默认是16379，如果设置为-16379则会随机一个可用端口，如果设置为0，则不启动console
-  password: pass123   #proxy的密码，如果设置了自定义的client-auth-provider-class-name，则密码参数无效
-  plugins: #使用yml配置插件，内置插件可以直接使用别名启用，自定义插件需要配置全类名
+  console-port: 16379 #console port, the default is 16379, if set to -16379, there will be a random available port, if set to 0, the console will not be started
+  password: pass123 #proxy password, if a custom client-auth-provider-class-name is set, the password parameter is invalid
+  plugins: #Use yml to configure plugins, built-in plugins can be enabled directly using aliases, custom plugins need to configure the full class name
     - monitorPlugin
     - bigKeyPlugin
     - hotKeyPlugin
     - com.xxx.xxx.CustomProxyPlugin
   transpond:
-    type: local #使用本地配置
+    type: local #Use local configuration
     local:
       type: simple
-      resource: redis://@127.0.0.1:6379 #转发的redis地址
-```
+      resource: redis://@127.0.0.1:6379 #Forwarded redis address
+````
 * camellia-redis-proxy.properties
-```
-#使用properties配置的插件可以运行期自定义增减
+````
+#Plugins configured using properties can be customized to increase or decrease at runtime
 proxy.plugin.list=monitorPlugin,bigKeyPlugin,com.xxx.xxx.CustomProxyPlugin
-```
+````
 
-### 内置插件
-```java
+### Built-in plugins
+````java
 public enum BuildInProxyPluginEnum {
-    //用于监控，主要是监控请求量和响应时间以及慢查询
+    //For monitoring, mainly monitoring request volume and response time and slow query
     MONITOR_PLUGIN("monitorPlugin", MonitorProxyPlugin.class, Integer.MAX_VALUE, Integer.MIN_VALUE),
-    //控制访问权限，ip黑白名单
+    //Control access rights, ip black and white list
     IP_CHECKER_PLUGIN("ipCheckerPlugin", IPCheckProxyPlugin.class, Integer.MAX_VALUE - 10000, 0),
-    //用于控制请求速率
+    // used to control the request rate
     RATE_LIMIT_PLUGIN("rateLimitPlugin", RateLimitProxyPlugin.class, Integer.MAX_VALUE - 20000, 0),
-    //用于拦截非法的key，直接快速失败
+    //Used to intercept illegal keys, fail directly and quickly
     TROUBLE_TRICK_KEYS_PLUGIN("troubleTrickKeys", TroubleTrickKeysProxyPlugin.class, Integer.MAX_VALUE - 30000, 0),
 
-    //用于热key缓存（仅支持GET命令）
+    //For hot key cache (only GET command is supported)
     HOT_KEY_CACHE_PLUGIN("hotKeyCachePlugin", HotKeyCacheProxyPlugin.class, 20000, Integer.MIN_VALUE + 10000),
-    //用于监控热key
+    //Used to monitor hot keys
     HOT_KEY_PLUGIN("hotKeyPlugin", HotKeyProxyPlugin.class, 10000, 0),
 
-    //用于监控大key
+    //Used to monitor the big key
     BIG_KEY_PLUGIN("bigKeyPlugin", BigKeyProxyPlugin.class, 0, 0),
-    //用于缓存双删（仅拦截DELETE命令）
+    //Used for cache double delete (only intercept DELETE command)
     DELAY_DOUBLE_DELETE_PLUGIN("delayDoubleDeletePlugin", DelayDoubleDeleteProxyPlugin.class, 0, 0),
-    //用于自定义双写规则（key维度的）
+    //Used for custom double write rules (key dimension)
     MULTI_WRITE_PLUGIN("multiWritePlugin", MultiWriteProxyPlugin.class, 0, 0),
 
-    //用于进行key/value的转换
+    //Used for key/value conversion
     CONVERTER_PLUGIN("converterPlugin", ConverterProxyPlugin.class, Integer.MIN_VALUE, Integer.MAX_VALUE),
     ;
     private final String alias;
@@ -110,22 +109,21 @@ public enum BuildInProxyPluginEnum {
         this.replyOrder = replyOrder;
     }
 }
-```
-内置插件列表：    
-* MonitorProxyPlugin，用于监控命令的请求qps和响应，具体见：[monitor-plugin](monitor-plugin.md)
-* BigKeyProxyPlugin，用于监控大key，具体见：[big-key](big-key.md)
-* HotKeyProxyPlugin，用于监控热key，具体见：[hot-key](hot-key.md)
-* HotKeyCacheProxyPlugin，用于热key缓存，支持GET命令，具体见：[hot-key-cache](hot-key-cache.md)
-* ConverterProxyPlugin，用于key/value的转换，如加解密，key命名空间等，具体见：[converter](converter.md)
-* MultiWriteProxyPlugin，用于自定义双写（可以到key级别），具体见：[multi-write](multi-write.md)
-* DelayDoubleDeleteProxyPlugin，用于透明到进行缓存双删（仅拦截DEL命令），具体见：[delay-double-delete](delay-double-delete.md)
-* TroubleTrickKeysProxyPlugin，用于临时拦截问题key的某些命令，具体见：[trouble-trick-keys](trouble-trick-keys.md)
-* RateLimitProxyPlugin，用于进行频率控制，支持租户级别进行控制，具体见：[rate-limit](rate-limit.md)
-* IPCheckProxyPlugin，用于控制客户端接入，支持ip黑白名单，具体见：[ip-checker](ip-checker.md)
+````
+List of built-in plugins:
+* MonitorProxyPlugin, used to monitor the request qps and response of the command, see: [monitor-plugin](monitor-plugin.md)
+* BigKeyProxyPlugin, used to monitor big keys, see: [big-key](big-key.md)
+* HotKeyProxyPlugin, used to monitor hot keys, see: [hot-key](hot-key.md)
+* HotKeyCacheProxyPlugin, used for hot key cache, supports GET command, see: [hot-key-cache](hot-key-cache.md)
+* ConverterProxyPlugin, used for key/value conversion, such as encryption and decryption, key namespace, etc. For details, see: [converter](converter.md)
+* MultiWriteProxyPlugin, used to customize double write (up to key level), see: [multi-write](multi-write.md)
+* DelayDoubleDeleteProxyPlugin, used to be transparent to cache double delete (only intercept DEL commands), see: [delay-double-delete](delay-double-delete.md)
+* TroubleTrickKeysProxyPlugin, used to temporarily intercept some commands of the problem key, see: [trouble-trick-keys](trouble-trick-keys.md)
+* RateLimitProxyPlugin, used for frequency control, supports tenant level control, see: [rate-limit](rate-limit.md)
+* IPCheckProxyPlugin, used to control client access, supports ip black and white list, see: [ip-checker](ip-checker.md)
 
-### 其他camellia提供的插件（不是内置，需要额外引入maven依赖）
-* MqMultiWriteProducerProxyPlugin，用于使用mq进行异步双写，具体见：[mq-multi-write](mq-multi-write.md)
+### Other plugins provided by camellia (not built-in, need to introduce additional maven dependencies)
+* MqMultiWriteProducerProxyPlugin, used for asynchronous double write using mq, see: [mq-multi-write](mq-multi-write.md)
 
-### 自定义插件
-实现ProxyPlugin接口，并把实现类的全类名配置到application.yml或者camellia-redis-proxy.properties里即可
-
+### Custom plugin
+Implement the ProxyPlugin interface and configure the full class name of the implementation class into application.yml or camellia-redis-proxy.properties

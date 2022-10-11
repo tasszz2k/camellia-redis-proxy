@@ -1,11 +1,10 @@
-
 ## RateLimitProxyPlugin
 
-### 说明
-* 用于控制客户端的请求tps，超过了会直接返回错误，而不是穿透到后端redis
+### illustrate
+* It is used to control the client's request tps, if it exceeds, it will return an error directly instead of penetrating to the backend redis
 
-### 启用方式
-```yaml
+### Enable method
+````yaml
 server:
   port: 6380
 spring:
@@ -13,29 +12,29 @@ spring:
     name: camellia-redis-proxy-server
 
 camellia-redis-proxy:
-  console-port: 16379 #console端口，默认是16379，如果设置为-16379则会随机一个可用端口，如果设置为0，则不启动console
-  password: pass123   #proxy的密码，如果设置了自定义的client-auth-provider-class-name，则密码参数无效
-  monitor-enable: true  #是否开启监控
-  monitor-interval-seconds: 60 #监控回调的间隔
-  plugins: #使用yml配置插件，内置插件可以直接使用别名启用，自定义插件需要配置全类名
+  console-port: 16379 #console port, the default is 16379, if set to -16379, there will be a random available port, if set to 0, the console will not be started
+  password: pass123 #proxy password, if a custom client-auth-provider-class-name is set, the password parameter is invalid
+  monitor-enable: true #Whether to enable monitoring
+  monitor-interval-seconds: 60 #Monitor callback interval
+  plugins: #Use yml to configure plugins, built-in plugins can be enabled directly using aliases, custom plugins need to configure the full class name
     - rateLimitPlugin
   transpond:
-    type: local #使用本地配置
+    type: local #Use local configuration
     local:
       type: simple
-      resource: redis://@127.0.0.1:6379 #转发的redis地址
-```
+      resource: redis://@127.0.0.1:6379 #Forwarded redis address
+````
 
-### 动态配置开关（camellia-redis-proxy.properties）
-```properties
-##检查周期
+### Dynamic configuration switch (camellia-redis-proxy.properties)
+````properties
+##inspection cycle
 rate.limit.check.millis=1000
-##最大请求次数，如果小于0，则不限制，如果等于0，则会拦截所有请求
+##Maximum number of requests, if it is less than 0, there is no limit, if it is equal to 0, all requests will be intercepted
 rate.limit.max.count=100000
 
-#bid/bgroup级别的速率控制（下面的例子表示bid=1，bgroup=default的请求，最多允许1000ms内10w次请求，超过会返回错误）
-##检查周期
+#bid/bgroup-level rate control (the following example indicates a request with bid=1, bgroup=default, a maximum of 10w requests within 1000ms are allowed, and an error will be returned if exceeded)
+##inspection cycle
 1.default.rate.limit.check.millis=1000
-##最大请求次数，如果小于0，则不限制，如果等于0，则会拦截所有请求
+##Maximum number of requests, if it is less than 0, there is no limit, if it is equal to 0, all requests will be intercepted
 1.default.rate.limit.max.count=100000
-```
+````

@@ -1,9 +1,8 @@
-
-## 使用camellia-dashboard管理动态路由
-你可以将路由信息托管到远程的camellia-dashboard（见[camellia-dashboard](/docs/dashboard/dashboard.md)）  
-camellia-dashboard是一个web服务，proxy会定期去检查camellia-dashboard里的配置是否有变更，如果有，则会更新proxy的路由  
-以下是一个配置示例：
-```yaml
+## Manage dynamic routing with camellia-dashboard
+You can host routing information to a remote camellia-dashboard (see [camellia-dashboard](/docs/dashboard/dashboard.md))
+camellia-dashboard is a web service. The proxy will regularly check whether the configuration in camellia-dashboard has changed. If there is, it will update the proxy's route.
+The following is an example configuration:
+````yaml
 server:
   port: 6380
 spring:
@@ -15,12 +14,12 @@ camellia-redis-proxy:
   transpond:
     type: remote
     remote:
-      url: http://127.0.0.1:8080 #camellia-dashbaord的地址
-      check-interval-millis: 5000 #到camellia-dashbaord的轮询周期
-      dynamic: true #表示支持多组配置，默认就是true
-      bid: 1 #默认的bid，当客户端请求时没有声明自己的bid和bgroup时使用的bgroup，可以缺省，若缺省则不带bid/bgroup的请求会被拒绝
-      bgroup: default #默认的bgroup，当客户端请求时没有声明自己的bid和bgroup时使用的bgroup，可以缺省，若缺省则不带bid/bgroup的请求会被拒绝
-```
-上面的配置表示proxy的路由配置会从camellia-dashboard获取，获取的是bid=1以及bgroup=default的那份配置   
-此外，proxy会定时检查camellia-dashboard上的配置是否更新了，若更新了，则会更新本地配置，默认检查的间隔是5s  
-特别的，当需要支持多租户时，设置dynamic=true即可  
+      url: http://127.0.0.1:8080 #camellia-dashbaord's address
+      check-interval-millis: 5000 # Polling period to camellia-dashbaord
+      dynamic: true # indicates that multiple sets of configurations are supported, the default is true
+      bid: 1 #The default bid, the bgroup used when the client does not declare its own bid and bgroup when requesting, can be the default, if the default, the request without bid/bgroup will be rejected
+      bgroup: default #The default bgroup, the bgroup used when the client does not declare its own bid and bgroup when requesting, can be the default, if the default, the request without bid/bgroup will be rejected
+````
+The above configuration indicates that the routing configuration of proxy will be obtained from camellia-dashboard, and the configuration of bid=1 and bgroup=default will be obtained.
+In addition, the proxy will regularly check whether the configuration on the camellia-dashboard has been updated. If it is updated, the local configuration will be updated. The default check interval is 5s.
+In particular, when you need to support multi-tenancy, you can set dynamic=true

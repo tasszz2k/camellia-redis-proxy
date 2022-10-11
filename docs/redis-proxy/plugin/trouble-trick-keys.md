@@ -1,11 +1,10 @@
-
 ## TroubleTrickKeysProxyPlugin
 
-### 说明
-* 用于临时屏蔽某些命令的指定方法的请求，会直接返回错误信息，而不是穿透到后端redis 
+### illustrate
+* The request for the specified method used to temporarily block some commands will directly return an error message instead of penetrating to the backend redis
 
-### 启用方式
-```yaml
+### Enable method
+````yaml
 server:
   port: 6380
 spring:
@@ -13,26 +12,26 @@ spring:
     name: camellia-redis-proxy-server
 
 camellia-redis-proxy:
-  console-port: 16379 #console端口，默认是16379，如果设置为-16379则会随机一个可用端口，如果设置为0，则不启动console
-  password: pass123   #proxy的密码，如果设置了自定义的client-auth-provider-class-name，则密码参数无效
-  monitor-enable: true  #是否开启监控
-  monitor-interval-seconds: 60 #监控回调的间隔
-  plugins: #使用yml配置插件，内置插件可以直接使用别名启用，自定义插件需要配置全类名
+  console-port: 16379 #console port, the default is 16379, if set to -16379, there will be a random available port, if set to 0, the console will not be started
+  password: pass123 #proxy password, if a custom client-auth-provider-class-name is set, the password parameter is invalid
+  monitor-enable: true #Whether to enable monitoring
+  monitor-interval-seconds: 60 #Monitor callback interval
+  plugins: #Use yml to configure plugins, built-in plugins can be enabled directly using aliases, custom plugins need to configure the full class name
     - troubleTrickKeys
   transpond:
-    type: local #使用本地配置
+    type: local #Use local configuration
     local:
       type: simple
-      resource: redis://@127.0.0.1:6379 #转发的redis地址
-```
+      resource: redis://@127.0.0.1:6379 #Forwarded redis address
+````
 
-### 动态配置开关（camellia-redis-proxy.properties）
-```properties
-#配置
-#表示：针对key1和key2的ZREVRANGEBYSCORE方法，针对key3和key4的GET方法，会被拦截（直接返回错误信息）
+### Dynamic configuration switch (camellia-redis-proxy.properties)
+````properties
+#configure
+#Means: The ZREVRANGEBYSCORE method for key1 and key2, and the GET method for key3 and key4 will be intercepted (return error message directly)
 trouble.trick.keys=ZREVRANGEBYSCORE:["key1","key2"];GET:["key3","key4"]
 
-#配置（租户级别）
-#表示：bid=2/bgroup=default路由配置下，针对key1和key2的ZRANGE方法，针对key3和key4的SMEMBERS方法，会被拦截（直接返回错误信息）
+#Configuration (tenant level)
+# means: bid=2/bgroup=default routing configuration, the ZRANGE method for key1 and key2, and the SMEMBERS method for key3 and key4 will be intercepted (returns an error message directly)
 2.default.trouble.trick.keys=ZRANGE:["key1","key2"];SMEMBERS:["key3","key4"]
-```
+````

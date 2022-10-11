@@ -1,14 +1,13 @@
-
 ## HotKeyCacheProxyPlugin
 
-### 说明
-* 一个用于支持热key缓存的Plugin
-* 只支持GET请求，proxy会监控GET请求的tps，如果超过阈值，会把结果缓存，下次请求时直接返回
-* 在缓存期间，proxy会定时穿透一个请求给后端，用于更新缓存值
-* 对于GET命令，支持根据key的前缀来判断是否要启用缓存机制，也可以自定义实现规则
+### illustrate
+* A Plugin to support hot key caching
+* Only GET requests are supported. The proxy will monitor the tps of the GET request. If it exceeds the threshold, the result will be cached and returned directly in the next request.
+* During the cache period, the proxy will periodically penetrate a request to the backend to update the cache value
+* For the GET command, it is supported to determine whether to enable the cache mechanism according to the prefix of the key, and you can also customize the implementation rules
 
-### 启用方式
-```yaml
+### Enable method
+````yaml
 server:
   port: 6380
 spring:
@@ -16,65 +15,65 @@ spring:
     name: camellia-redis-proxy-server
 
 camellia-redis-proxy:
-  console-port: 16379 #console端口，默认是16379，如果设置为-16379则会随机一个可用端口，如果设置为0，则不启动console
-  password: pass123   #proxy的密码，如果设置了自定义的client-auth-provider-class-name，则密码参数无效
-  monitor-enable: true  #是否开启监控
-  monitor-interval-seconds: 60 #监控回调的间隔
-  plugins: #使用yml配置插件，内置插件可以直接使用别名启用，自定义插件需要配置全类名
+  console-port: 16379 #console port, the default is 16379, if set to -16379, there will be a random available port, if set to 0, the console will not be started
+  password: pass123 #proxy password, if a custom client-auth-provider-class-name is set, the password parameter is invalid
+  monitor-enable: true #Whether to enable monitoring
+  monitor-interval-seconds: 60 #Monitor callback interval
+  plugins: #Use yml to configure plugins, built-in plugins can be enabled directly using aliases, custom plugins need to configure the full class name
     - hotKeyCachePlugin
   transpond:
-    type: local #使用本地配置
+    type: local #Use local configuration
     local:
       type: simple
-      resource: redis://@127.0.0.1:6379 #转发的redis地址
-```
+      resource: redis://@127.0.0.1:6379 #Forwarded redis address
+````
 
-### 动态配置开关（camellia-redis-proxy.properties）
-```properties
-#哪些key需要热key缓存功能，默认实现是PrefixMatchHotKeyCacheKeyChecker，可以基于key的前缀去配置，你可以自定义实现（实现HotKeyCacheKeyChecker接口即可）
+### Dynamic configuration switch (camellia-redis-proxy.properties)
+````properties
+#Which keys need the hot key cache function, the default implementation is PrefixMatchHotKeyCacheKeyChecker, which can be configured based on the prefix of the key, and you can customize the implementation (implement the HotKeyCacheKeyChecker interface)
 hot.key.cache.key.checker.className=com.netease.nim.camellia.redis.proxy.plugin.hotkeycache.PrefixMatchHotKeyCacheKeyChecker
 
-#使用PrefixMatchHotKeyCacheKeyChecker时的前缀配置方法，如果要配置所有key都启用热key缓存功能，设置空字符串即可，默认所有key都不生效
+#Prefix configuration method when using PrefixMatchHotKeyCacheKeyChecker, if you want to configure all keys to enable the hot key cache function, you can set an empty string, and all keys will not take effect by default
 hot.key.cache.key.prefix=["dao_c", "kkk"]
-#使用PrefixMatchHotKeyCacheKeyChecker时的前缀配置方法（租户级别）
+#Prefix configuration method when using PrefixMatchHotKeyCacheKeyChecker (tenant level)
 1.default.hot.key.cache.key.prefix=["dao_c", "kkk"]
 
-##热key缓存相关的配置
-#热key缓存功能的开关，默认true
+##Hot key cache related configuration
+#The switch of the hot key cache function, the default is true
 hot.key.cache.enable=true
-#用于判断是否是热key的LRU计数器的容量
+#The capacity of the LRU counter used to determine whether it is a hot key
 hot.key.cache.counter.capacity=100000
-#用于判断是否是热key的LRU计数器的时间窗口，默认1000ms
+#The time window of the LRU counter used to judge whether it is a hot key, the default is 1000ms
 hot.key.cache.counter.check.millis=1000
-#判定为热key的阈值，默认100
+#The threshold for determining the hot key, the default is 100
 hot.key.cache.check.threshold=100
-#是否缓存null的value，默认true
+#Whether to cache null value, default true
 hot.key.cache.null=true
-#热key缓存的时长，默认10s，过期一半的时候会穿透一个GET请求到后端
+#The duration of the hot key cache, the default is 10s, when half expired, it will penetrate a GET request to the backend
 hot.key.cache.expire.millis=10000
-#最多多少个缓存的热key，默认1000
+# Maximum number of cached hot keys, default 1000
 hot.key.cache.max.capacity=1000
 
-##热key缓存相关的配置（租户级别，bid=1，bgroup=default）
-#热key缓存功能的开关，默认true
+##Hot key cache related configuration (tenant level, bid=1, bgroup=default)
+#The switch of the hot key cache function, the default is true
 1.default.hot.key.cache.enable=true
-#用于判断是否是热key的LRU计数器的容量
+#The capacity of the LRU counter used to determine whether it is a hot key
 1.default.hot.key.cache.counter.capacity=100000
-#用于判断是否是热key的LRU计数器的时间窗口，默认1000ms
+#The time window of the LRU counter used to judge whether it is a hot key, the default is 1000ms
 1.default.hot.key.cache.counter.check.millis=1000
-#判定为热key的阈值，默认100
+#The threshold for determining the hot key, the default is 100
 1.default.hot.key.cache.check.threshold=100
-#是否缓存null的value，默认true
+#Whether to cache null value, default true
 1.default.hot.key.cache.null=true
-#热key缓存的时长，默认10s，过期一半的时候会穿透一个GET请求到后端
+#The duration of the hot key cache, the default is 10s, when half expired, it will penetrate a GET request to the backend
 1.default.hot.key.cache.expire.millis=10000
-#最多多少个缓存的热key，默认1000
+# Maximum number of cached hot keys, default 1000
 1.default.hot.key.cache.max.capacity=1000
 
 
-##监控数据默认通过/monitor进行对外暴露（默认60s刷新一次数据），如果需要实时推送，可以设置callback（实现HotKeyCacheStatsCallback接口即可）
-###默认的callback不做任何处理
+##The monitoring data is exposed to the public through /monitor by default (the data is refreshed every 60s by default). If you need to push it in real time, you can set a callback (implement the HotKeyCacheStatsCallback interface)
+###The default callback does not do anything
 hot.key.cache.stats.callback.className=com.netease.nim.camellia.redis.proxy.plugin.hotkeycache.DummyHotKeyCacheStatsCallback
-#热key缓存命中情况实时推送的间隔，默认10s
+#Interval for real-time push of hot key cache hits, default 10s
 hot.key.cache.stats.callback.interval.seconds=10
-```
+````

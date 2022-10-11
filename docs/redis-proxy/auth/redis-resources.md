@@ -1,108 +1,107 @@
+## Supported redis backend types
 
-## 支持的redis后端类型
+We describe the back-end redis server by url, which supports three types: ordinary single-point redis, redis-sentinel, and redis-cluster. In addition, it also supports proxying the read command to the slave node of redis-sentinel. The specific url format is as follows:
 
-我们通过url的方式来描述后端redis服务器，支持普通单点redis、redis-sentinel、redis-cluster三种类型，此外还支持将读命令代理到redis-sentinel的从节点，具体的url格式如下：
-
-* 普通单点redis
-```
-##有密码
+* Ordinary single point redis
+````
+##with password
 redis://passwd@127.0.0.1:6379
-##没有密码
+##without password
 redis://@127.0.0.1:6379
-##有账号也有密码
+##Have an account and a password
 redis://username:passwd@127.0.0.1:6379
-```
+````
 
 * redis-sentinel
-```
-##有密码
+````
+##with password
 redis-sentinel://passwd@127.0.0.1:16379,127.0.0.1:16379/masterName
-##没有密码
+##without password
 redis-sentinel://@127.0.0.1:16379,127.0.0.1:16379/masterName
-##有账号也有密码
+##Have an account and a password
 redis-sentinel://username:passwd@127.0.0.1:16379,127.0.0.1:16379/masterName
-```
+````
 
 * redis-cluster
-```
-##有密码
+````
+##with password
 redis-cluster://passwd@127.0.0.1:6379,127.0.0.2:6379,127.0.0.3:6379
-##没有密码
+##without password
 redis-cluster://@127.0.0.1:6379,127.0.0.2:6379,127.0.0.3:6379
-##有账号也有密码
+##Have an account and a password
 redis-cluster://username:passwd@127.0.0.1:6379,127.0.0.2:6379,127.0.0.3:6379
-```
+````
 
 * redis-sentinel-slaves
-```
-##本类型的后端只能配置为读写分离模式下的读地址
+````
+##This type of backend can only be configured as a read address in read-write separation mode
 
-##不读master，此时proxy会从slave集合中随机挑选一个slave进行命令的转发
-##有密码
+##Do not read the master, at this time the proxy will randomly select a slave from the slave set to forward the command
+##with password
 redis-sentinel-slaves://passwd@127.0.0.1:16379,127.0.0.1:16379/masterName?withMaster=false
-##没有密码
+##without password
 redis-sentinel-slaves://@127.0.0.1:16379,127.0.0.1:16379/masterName?withMaster=false
-##有账号也有密码
+##Have an account and a password
 redis-sentinel-slaves://username:passwd@127.0.0.1:16379,127.0.0.1:16379/masterName?withMaster=false
 
-##读master，此时proxy会从master+slave集合中随机挑选一个节点进行命令的转发（可能是master也可能是slave，所有节点概率相同）
-##有密码
+##Read the master, at this time the proxy will randomly select a node from the master+slave set to forward the command (maybe the master or the slave, all nodes have the same probability)
+##with password
 redis-sentinel-slaves://passwd@127.0.0.1:16379,127.0.0.1:16379/masterName?withMaster=true
-##没有密码
+##without password
 redis-sentinel-slaves://@127.0.0.1:16379,127.0.0.1:16379/masterName?withMaster=true
-##有账号也有密码
+##Have an account and a password
 redis-sentinel-slaves://username:passwd@127.0.0.1:16379,127.0.0.1:16379/masterName?withMaster=true
 
-##redis-sentinel-slaves会自动感知：节点宕机、主从切换和节点扩容
-```
+##redis-sentinel-slaves will automatically sense: node downtime, master-slave switching and node expansion
+````
 
 * redis-cluster-slaves
-```
-##本类型的后端只能配置为读写分离模式下的读地址，如果配置为写地址，proxy不会报错，但是每次写请求都会产生一次重定向，性能会大大受影响
+````
+##This type of backend can only be configured as a read address in read-write separation mode. If it is configured as a write address, the proxy will not report an error, but each write request will generate a redirection, which will greatly affect performance.
 
-##不读master，此时proxy会从slave集合中随机挑选一个slave进行命令的转发
-##有密码
+##Do not read the master, at this time the proxy will randomly select a slave from the slave set to forward the command
+##with password
 redis-cluster-slaves://passwd@127.0.0.1:16379,127.0.0.1:16379?withMaster=false
-##没有密码
+##without password
 redis-cluster-slaves://@127.0.0.1:16379,127.0.0.1:16379?withMaster=false
-##有账号也有密码
+##Have an account and a password
 redis-cluster-slaves://username:passwd@127.0.0.1:16379,127.0.0.1:16379?withMaster=false
 
-##读master，此时proxy会从master+slave集合中随机挑选一个节点进行命令的转发（可能是master也可能是slave，所有节点概率相同）
-##有密码
+##Read the master, at this time the proxy will randomly select a node from the master+slave set to forward the command (maybe the master or the slave, all nodes have the same probability)
+##with password
 redis-cluster-slaves://passwd@127.0.0.1:16379,127.0.0.1:16379?withMaster=true
-##没有密码
+##without password
 redis-cluster-slaves://@127.0.0.1:16379,127.0.0.1:16379?withMaster=true
-##有账号也有密码
+##Have an account and a password
 redis-cluster-slaves://username:passwd@127.0.0.1:16379,127.0.0.1:16379?withMaster=true
 
-##redis-cluster-slaves会自动感知：节点宕机、主从切换和节点扩容
-```
+##redis-cluster-slaves will automatically sense: node downtime, master-slave switchover and node expansion
+````
 
-* redis-proxies
-```
-##本类型主要是为了代理到多个无状态的proxy节点，如codis-proxy、twemproxy等，camellia-redis-proxy会从配置的多个node中随机选择一个进行转发
-##当后端的proxy node有宕机时，camellia-redis-proxy会动态剔除相关节点，如果节点恢复了则会动态加回
+*redis-proxies
+````
+##This type is mainly for proxying to multiple stateless proxy nodes, such as codis-proxy, twemproxy, etc. camellia-redis-proxy will randomly select one of the configured nodes for forwarding
+##When the back-end proxy node is down, camellia-redis-proxy will dynamically remove the relevant node, and if the node is restored, it will be dynamically added back
 
-##有密码
+##with password
 redis-proxies://passwd@127.0.0.1:6379,127.0.0.2:6379,127.0.0.3:6379
-##没有密码
+##without password
 redis-proxies://@127.0.0.1:6379,127.0.0.2:6379,127.0.0.3:6379
-##有账号也有密码
+##Have an account and a password
 redis-proxies://username:passwd@127.0.0.1:6379,127.0.0.2:6379,127.0.0.3:6379
-```
+````
 
 * redis-proxies-discovery
-```
-##本类型主要是为了代理到多个无状态的proxy节点，如codis-proxy、twemproxy等
-##与redis-proxies的区别在于，本类型支持从注册中心获取无状态proxy节点的列表，并动态增减相关节点
-##为了实现和注册中心进行交互，你需要先实现ProxyDiscoveryFactory接口（支持全类名配置，也支持spring直接注入相关实现类）
-##本类型通过proxyName来标识proxy节点列表，并通过proxyName去ProxyDiscoveryFactory获取实际的proxy节点列表
+````
+##This type is mainly for proxying to multiple stateless proxy nodes, such as codis-proxy, twemproxy, etc.
+##The difference from redis-proxies is that this type supports obtaining a list of stateless proxy nodes from the registry, and dynamically increasing or decreasing related nodes
+##In order to interact with the registry, you need to implement the ProxyDiscoveryFactory interface first (supports full class name configuration, and also supports direct injection of related implementation classes by spring)
+##This type identifies the proxy node list through proxyName, and goes to ProxyDiscoveryFactory through proxyName to obtain the actual proxy node list
 
-##有密码
+##with password
 redis-proxies-discovery://passwd@proxyName
-##没有密码
+##without password
 redis-proxies-discovery://@proxyName
-##有密码且有账号
+##Have a password and have an account
 redis-proxies-discovery://username:passwd@proxyName
-```
+````

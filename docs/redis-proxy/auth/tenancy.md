@@ -1,12 +1,11 @@
+## Multi-tenancy
+camellia-redis-proxy supports multi-tenancy. Tenants are uniquely identified by bid (number) and bgroup (string). For different tenants, you can configure different backend redis and different monitoring parameters (such as key threshold)
 
-## 多租户
-camellia-redis-proxy支持多租户，租户通过bid（数字）和bgroup（字符串）两个字段来唯一确认，对于不同的租户，你可以配置不同的后端redis，以及不同的监控参数（如大key的阈值）
+### How to identify which tenant a client connection belongs to
 
-### 怎么识别一个客户端连接归属于哪个租户
-
-#### 默认使用clientname来标识
-这个例子表示使用bid=10以及bgroup=default这个租户
-```
+#### By default, clientname is used to identify
+This example shows the tenant using bid=10 and bgroup=default
+````
 ➜ ~ ./redis-cli -h 127.0.0.1 -p 6380 -a pass123
 127.0.0.1:6379> client setname camellia_10_default
 OK
@@ -14,14 +13,14 @@ OK
 OK
 127.0.0.1:6380> get k1
 "v1"
-127.0.0.1:6380> mget k1 k2 k3
+127.0.0.1:6380 > mget k1 k2 k3
 1) "v1"
 2) (nil)
 3) (nil)
-```
-客户端示例：
-如果端侧是Java，且使用了Jedis，则可以这样调用：
-```java
+````
+Client example:
+If the backend is Java and Jedis is used, it can be called like this:
+````java
 public class Test {
     public static void main(String[] args) {
         JedisPool jedisPool = new JedisPool(new JedisPoolConfig(), "127.0.0.1", 6380,
@@ -37,15 +36,15 @@ public class Test {
         }
     }
 }
-```
+````
 
-#### 使用ClientAuthProvider接口自定义实现租户选择逻辑
-ClientAuthProvider使用登录密码来区分不同的租户，camellia内置了一个DynamicConfClientAuthProvider实现，通过camellia-redis-proxy.properties来配置多租户映射关系  
-启用方式： 
-```yaml
+#### Customize the tenant selection logic using the ClientAuthProvider interface
+ClientAuthProvider uses the login password to distinguish different tenants. Camellia has a built-in DynamicConfClientAuthProvider implementation, which configures the multi-tenant mapping relationship through camellia-redis-proxy.properties
+How to enable:
+````yaml
 camellia-redis-proxy:
-  monitor-enable: true  #是否开启监控
-  monitor-interval-seconds: 60 #监控回调的间隔
+  monitor-enable: true #Whether to enable monitoring
+  monitor-interval-seconds: 60 #Monitor callback interval
   client-auth-provider-class-name: com.netease.nim.camellia.redis.proxy.auth.DynamicConfClientAuthProvider
   transpond:
     type: remote
@@ -54,21 +53,21 @@ camellia-redis-proxy:
       bgroup: default
       url: http://xxx:8080
       monitor: true
-      check-interval-millis: 5000    
-```
-随后你可以在camellia-redis-proxy.properties里这里配置：  
-```
+      check-interval-millis: 5000
+````
+Then you can configure it here in camellia-redis-proxy.properties:
+````
 pass123.auth.conf=1|default
 pass456.auth.conf=2|default
-```
-上述例子表示：
-* 当使用密码pass123登录proxy时，使用bid=1,bgroup=default的路由
-* 当使用密码pass456登录proxy时，使用bid=2,bgroup=default的路由
+````
+The above example means:
+* When using the password pass123 to log in to the proxy, use the route of bid=1, bgroup=default
+* When using the password pass456 to log in to the proxy, use the route of bid=2, bgroup=default
 
 
-当然你也可以自己实现一个ClientAuthProvider，如下：
-一个简单的例子：
-```java
+Of course, you can also implement a ClientAuthProvider yourself, as follows:
+A simple example:
+````java
 public class MockClientAuthProvider implements ClientAuthProvider {
 
     @Override
@@ -93,13 +92,11 @@ public class MockClientAuthProvider implements ClientAuthProvider {
         return true;
     }
 }
-```  
-上面的例子表示：
-* 当使用密码pass1登录proxy时，使用bid=1,bgroup=default的路由
-* 当使用密码pass2登录proxy时，使用bid=2,bgroup=default的路由
-* 当使用密码pass3登录proxy时，使用默认路由，也就是bid=1,bgroup=default
+````
+The above example means:
+* When using the password pass1 to log in to the proxy, use the route of bid=1, bgroup=default
+* When using the password pass2 to log in to the proxy, use the route of bid=2, bgroup=default
+* When using the password pass3 to log in to the proxy, use the default route, which is bid=1, bgroup=default
 
 
-感谢[@yangxb2010000](https://github.com/yangxb2010000)提供上述功能
-
-
+Thanks to [@yangxb2010000](https://github.com/yangxb2010000) for providing the above functions

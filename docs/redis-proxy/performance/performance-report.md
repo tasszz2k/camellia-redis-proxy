@@ -1,20 +1,20 @@
-## 性能测试
+## Performance Testing
 
-### 机器配置
+### machine configuration
 
-|机器|规格|备注
+|Machine|Specification|Remarks
 |:---:|:---:|:---:|
-|redis-proxy|4C8G云主机 ||
-|redis cluster|4C8G云主机 |单机混部，3台机器部署了6主6从的集群|
-|压测机|4C8G云主机 |||
+|redis-proxy|4C8G cloud host ||
+|redis cluster|4C8G cloud host |Single machine mixed, 3 machines deployed a cluster of 6 masters and 6 slaves|
+|Pressure Tester|4C8G Cloud Host |||
 
-### proxy配置
-#### camellia-redis-proxy配置(1.0.37)
-```
+### proxy configuration
+#### camellia-redis-proxy configuration (1.0.37)
+````
 -Xms4096m -Xmx4096m -XX:+UseG1GC
-```
+````
 
-```yaml
+````yaml
 server:
   port: 6380
 spring:
@@ -26,13 +26,13 @@ camellia-redis-proxy:
   transpond:
     type: local
     local:
-      resource: redis-cluster://@nim-redis-perftest-jd-1.v1.yunxin.jd1.vpc:7000,nim-redis-perftest-jd-2.v1.yunxin.jd1.vpc:7006,nim-redis-perftest-jd-3.v1.yunxin.jd1.vpc:7010
-```
+      resource: redis-cluster://@nim-redis-perftest-jd-1.v1.yunxin.jd1.vpc:7000,nim-redis-perftest-jd-2.v1.yunxin.jd1.vpc:7006,nim -redis-perftest-jd-3.v1.yunxin.jd1.vpc:7010
+````
 
-#### predixy配置(版本：1.0.5，WorkerThreads设置为4获取了最高的性能)  
+#### predixy configuration (version: 1.0.5, WorkerThreads set to 4 for maximum performance)
 
-predixy.conf  
-```
+predixy.conf
+````
 Name PredixyExample
 
 Bind 0.0.0.0:6380
@@ -50,9 +50,9 @@ LogErrorSample 1
 
 Include auth.conf
 Include cluster.conf
-```
+````
 cluster.conf
-```
+````
 ClusterServerPool {
     MasterReadPriority 60
     StaticSlaveReadPriority 50
@@ -67,22 +67,22 @@ ClusterServerPool {
         + nim-redis-perftest-jd-2.v1.yunxin.jd1.vpc:7006
     }
 }
-```
+````
 
-#### 官方redis-cluster-proxy配置（版本：1.0-beta2）
-```
-./redis-cluster-proxy --port 6380 --enable-cross-slot nim-redis-perftest-jd-1.v1.yunxin.jd1.vpc:7000 nim-redis-perftest-jd-2.v1.yunxin.jd1.vpc:7006
-```
+#### Official redis-cluster-proxy configuration (version: 1.0-beta2)
+````
+./redis-cluster-proxy --port 6380 --enable-cross-slot nim-redis-perftest-jd-1.v1.yunxin.jd1.vpc:7000 nim-redis-perftest-jd-2.v1.yunxin .jd1.vpc:7006
+````
 
-#### bilibili-overlord配置（版本：1.9.4，使用了官方推荐的node_connections=2）
+#### bilibili-overlord configuration (version: 1.9.4, using the officially recommended node_connections=2)
 overlord.toml
-```
+````
 [[clusters]]
 # This be used to specify the name of cache cluster.
 name = "test-redis-cluster"
-# The name of the hash function. Possible values are: sha1.
+# The name of the hash function. Possible values ​​are: sha1.
 hash_method = "fnv1a_64"
-# The key distribution mode. Possible values are: ketama.
+# The key distribution mode. Possible values ​​are: ketama.
 hash_distribution = "ketama"
 # A two character string that specifies the part of the key used for hashing. Eg "{}".
 hash_tag = "{}"
@@ -113,9 +113,9 @@ servers = [
     "nim-redis-perftest-jd-1.v1.yunxin.jd1.vpc:7000",
     "nim-redis-perftest-jd-2.v1.yunxin.jd1.vpc:7006",
 ]
-```
+````
 
-### 测试结果
+### Test Results
 
 ````
 ./redis-benchmark -n 1000000 -r 10000 -c 200 -t set,get,incr,lpush,rpush,lpop,rpop,sadd,hset,spop,lpush,lrange -q -p 6380 -h 10.189.28.132

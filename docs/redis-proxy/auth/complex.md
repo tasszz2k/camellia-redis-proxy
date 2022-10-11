@@ -1,16 +1,15 @@
+### Complex configuration (json-file configuration example)
 
-### 复杂配置（json-file配置示例）
-
-#### 配置单个地址
-使用单独配置文件方式进行配置时，文件一般来说是一个json文件，但是如果你的配置文件里只写一个地址，也是允许的，proxy会识别这种情况，如下：
-```
+#### Configure a single address
+When using a separate configuration file for configuration, the file is generally a json file, but if you only write one address in your configuration file, it is also allowed, and the proxy will recognize this situation, as follows:
+````
 redis://passwd@127.0.0.1:6379
-```
-配置文件里只有一行数据，就是一个后端redis地址，表示proxy的路由转发规则是最简单的形式，也就是直接转发给该redis实例  
-此时的配置效果和在application.yml里直接配置resource地址url效果是一样的，但是区别在于使用独立配置文件时，该地址是支持动态更新的
+````
+There is only one line of data in the configuration file, which is a back-end redis address, indicating that the proxy's routing forwarding rule is the simplest form, that is, it is directly forwarded to the redis instance
+The configuration effect at this time is the same as directly configuring the resource address url in application.yml, but the difference is that when a separate configuration file is used, the address supports dynamic update
 
-#### 配置读写分离一
-```json
+#### Configure read-write separation one
+````json
 {
   "type": "simple",
   "operation": {
@@ -19,15 +18,15 @@ redis://passwd@127.0.0.1:6379
     "write": "redis-sentinel://passwd2@127.0.0.1:6379,127.0.0.1:6378/master"
   }
 }
-```
-上面的配置表示：
-* 写命令会代理到redis-sentinel://passwd2@127.0.0.1:6379,127.0.0.1:6378/master
-* 读命令会代理到redis://passwd123@127.0.0.1:6379
+````
+The configuration above means:
+* Write commands will be proxied to redis-sentinel://passwd2@127.0.0.1:6379,127.0.0.1:6378/master
+* The read command will be proxied to redis://passwd123@127.0.0.1:6379
 
-可以看到json里可以混用redis、redis-sentinel、redis-cluster
+You can see that redis, redis-sentinel, and redis-cluster can be mixed in json
 
-#### 配置读写分离二
-```json
+#### Configure read-write separation 2
+````json
 {
   "type": "simple",
   "operation": {
@@ -36,13 +35,13 @@ redis://passwd@127.0.0.1:6379
     "write": "redis-sentinel://passwd123@127.0.0.1:26379/master"
   }
 }
-```
-上面的配置表示：
-* 写命令会代理到redis-sentinel://passwd123@127.0.0.1:26379/master
-* 读命令会代理到redis-sentinel-slaves://passwd123@127.0.0.1:26379/master?withMaster=true，也就是redis-sentinel://passwd123@127.0.0.1:26379/master的主节点和所有从节点
+````
+The configuration above means:
+* Write commands will be proxied to redis-sentinel://passwd123@127.0.0.1:26379/master
+* The read command will proxy to redis-sentinel-slaves://passwd123@127.0.0.1:26379/master?withMaster=true, which is the master node of redis-sentinel://passwd123@127.0.0.1:26379/master and all slave node
 
-#### 配置分片（因为之前命名错误，1.0.45及之前的版本，使用shading，1.0.46及之后的版本兼容sharding/shading）
-```json
+#### Configure sharding (because of the previous naming error, 1.0.45 and earlier versions use shading, 1.0.46 and later versions are compatible with sharding/shading)
+````json
 {
   "type": "sharding",
   "operation": {
@@ -53,13 +52,13 @@ redis://passwd@127.0.0.1:6379
     "bucketSize": 6
   }
 }
-```
-上面的配置表示key划分为6个分片，其中：
-* 分片[0,2,4]代理到redis://password1@127.0.0.1:6379
-* 分片[1,3,5]代理到redis-cluster://@127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381
+````
+The above configuration indicates that the key is divided into 6 shards, of which:
+* Shard [0,2,4] proxy to redis://password1@127.0.0.1:6379
+* Shard [1,3,5] proxy to redis-cluster://@127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381
 
-#### 配置双（多）写
-```json
+#### Configure double (multi) write
+````json
 {
   "type": "simple",
   "operation": {
@@ -74,13 +73,13 @@ redis://passwd@127.0.0.1:6379
     }
   }
 }
-```
-上面的配置表示：
-* 所有的写命令（如setex/zadd/hset）代理到redis://passwd1@127.0.0.1:6379和redis://passwd2@127.0.0.1:6380（即双写），特别的，客户端的回包是看的配置的第一个写地址
-* 所有的读命令（如get/zrange/mget）代理到redis://passwd1@127.0.0.1:6379
+````
+The configuration above means:
+* All write commands (such as setex/zadd/hset) are proxied to redis://passwd1@127.0.0.1:6379 and redis://passwd2@127.0.0.1:6380 (ie double write), in particular, the client's return The package is the first write address of the configuration seen
+* All read commands (like get/zrange/mget) are proxied to redis://passwd1@127.0.0.1:6379
 
-#### 配置多读
-```json
+#### Configure read more
+````json
 {
   "type": "simple",
   "operation": {
@@ -95,13 +94,13 @@ redis://passwd@127.0.0.1:6379
     "write": "redis://passwd1@127.0.0.1:6379"
   }
 }
-```
-上面的配置表示：
-* 所有的写命令（如setex/zadd/hset）代理到redis://passwd1@127.0.0.1:6379
-* 所有的读命令（如get/zrange/mget）随机代理到redis://passwd1@127.0.0.1:6379或者redis://password2@127.0.0.1:6380
+````
+The configuration above means:
+* All write commands (such as setex/zadd/hset) are proxied to redis://passwd1@127.0.0.1:6379
+* All read commands (like get/zrange/mget) are randomly proxied to redis://passwd1@127.0.0.1:6379 or redis://password2@127.0.0.1:6380
 
-#### 混合各种分片、双写逻辑（因为之前命名错误，1.0.45及之前的版本，使用shading，1.0.46及之后的版本兼容sharding/shading）
-```json
+#### Mix various sharding and double write logic (because of the previous naming error, 1.0.45 and earlier versions use shading, 1.0.46 and later versions are compatible with sharding/shading)
+````json
 {
   "type": "sharding",
   "operation": {
@@ -140,5 +139,5 @@ redis://passwd@127.0.0.1:6379
     "bucketSize": 6
   }
 }
-```
-上面的配置表示key被划分为6个分片，其中分片4配置了读写分离和双写的逻辑，分片5设置了读写分离和双写多读的逻辑
+````
+The above configuration indicates that the key is divided into 6 shards, of which shard 4 is configured with the logic of read-write separation and double-write, and shard 5 has the logic of read-write separation and double-write multi-read.

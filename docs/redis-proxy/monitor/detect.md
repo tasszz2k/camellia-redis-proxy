@@ -1,20 +1,20 @@
-## 把proxy当做一个监控redis集群状态的平台（通过http接口暴露）
-你可以使用http接口去请求proxy，并把需要探测的redis地址传递给proxy，proxy会以json格式返回目标redis集群的信息  
+## Treat proxy as a platform for monitoring the status of redis cluster (exposed through http interface)
+You can use the http interface to request the proxy, and pass the redis address to be probed to the proxy, and the proxy will return the information of the target redis cluster in json format
 
-### 请求示例  
-```
+### Request example
+````
 http://127.0.0.1:16379/detect?url=redis-cluster://@127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7002
-```
-支持针对redis-standalone、redis-sentinel、redis-cluster三种redis集群的监控
+````
+Supports monitoring of three redis clusters: redis-standalone, redis-sentinel, and redis-cluster
 
-### 返回示例
-包括如下信息：
-* 集群状态
-* 集群内存情况（总内存、已用内存）
-* 集群key数量（总key数、带ttl的key数量）
-* 集群qps
-* 节点信息，包括各个节点的内存、key数量、tps等信息
-```json
+### return example
+Include the following information:
+* Cluster status
+* Cluster memory situation (total memory, used memory)
+* Number of cluster keys (total keys, keys with ttl)
+* Cluster qps
+* Node information, including the memory of each node, the number of keys, tps and other information
+````json
 {
     "info":
       [
@@ -148,24 +148,24 @@ http://127.0.0.1:16379/detect?url=redis-cluster://@127.0.0.1:7000,127.0.0.1:7001
         }
     ]
 }
-```
+````
 
-### 备注
-当把proxy作为一个监控平台使用时，proxy启动时可能不知道要访问后端redis地址，为了避免proxy启动失败，可以配置启动时不进行预热（preheat参数设置为false），如下：
-```yaml
+### Remark
+When the proxy is used as a monitoring platform, the proxy may not know to access the back-end redis address when it starts. In order to avoid the failure of the proxy to start, it can be configured without preheating (the preheat parameter is set to false), as follows:
+````yaml
 server:
-  port: 6380
+   port: 6380
 spring:
-  application:
-    name: camellia-redis-proxy-server
+   application:
+     name: camellia-redis-proxy-server
 
 camellia-redis-proxy:
-  console-port: 16379 #console端口，默认是16379，detect接口需要走这个端口
-  transpond:
-    type: local #使用本地配置
-    local:
-      type: simple
-      resource: redis://@127.0.0.1:6379 #转发的redis地址
-    redis-conf:
-      preheat: false #表示是否启动时检查后端redis的联通性，默认true，如果后端redis不可达，则proxy无法启动
-```
+   console-port: 16379 #console port, the default is 16379, the detect interface needs to go through this port
+   transpond:
+     type: local #Use local configuration
+     local:
+       type: simple
+       resource: redis://@127.0.0.1:6379 #Forwarded redis address
+     redis-conf:
+       preheat: false #Indicates whether to check the connectivity of the backend redis at startup, the default is true, if the backend redis is unreachable, the proxy cannot be started
+````

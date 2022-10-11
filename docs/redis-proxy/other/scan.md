@@ -1,18 +1,17 @@
+## About scan
 
-## 关于scan
+* camellia-redis-proxy supports scan command, no matter whether the backend is proxy redis-standalone or redis-sentinel or redis-cluster
+* When the proxy's routing configuration is a custom shard (for example, two redis-cluster clusters form a logically large cluster, or multiple groups of redis-sentinel master-slave form a large cluster), the scan command is still valid, and the proxy Each read backend is scanned in order
+* When the backend of the proxy is redis-cluster or sharding is defined, the cursor returned by each scan may be numerically large, because the index of the backend node is recorded on the cursor, and the caller does not need to care
 
-* camellia-redis-proxy支持scan命令，不管后端是代理的的redis-standalone还是redis-sentinel还是redis-cluster
-* 当proxy的路由配置是自定义分片时（比如2个redis-cluster集群组成一个逻辑上的大集群，或者多组redis-sentinel主从组成一个大集群），scan命令仍然是有效的，proxy会按照顺序依次扫描每个读后端
-* 当proxy的后端是redis-cluster或者定义分片时，每次scan返回的cursor从数值上看可能很大，这是因为cursor上记录了后端node的index，调用方不需要关心
-
-### 例子一
-```
+### Example 1
+````
 redis-cluster://@127.0.0.1:6379,127.0.0.1:6380
-```
-* scan会扫描redis-cluster://@127.0.0.1:6379,127.0.0.1:6380的所有master节点
+````
+* scan will scan all master nodes of redis-cluster://@127.0.0.1:6379,127.0.0.1:6380
 
-### 例子二
-```json
+### Example 2
+````json
 {
   "type": "simple",
   "operation": {
@@ -21,11 +20,11 @@ redis-cluster://@127.0.0.1:6379,127.0.0.1:6380
     "write": "redis://@127.0.0.1:6378"
   }
 }
-```
-* scan会扫描redis://@127.0.0.1:6379
+````
+* scan will scan redis://@127.0.0.1:6379
 
-### 例子三
-```json
+### Example 3
+````json
 {
   "type": "sharding",
   "operation": {
@@ -36,6 +35,5 @@ redis-cluster://@127.0.0.1:6379,127.0.0.1:6380
     "bucketSize": 6
   }
 }
-```
-* scan会扫描redis://@127.0.0.1:6379以及redis-cluster://@127.0.0.1:6378,127.0.0.1:6377的所有master节点
-
+````
+* scan will scan all master nodes of redis://@127.0.0.1:6379 and redis-cluster://@127.0.0.1:6378,127.0.0.1:6377

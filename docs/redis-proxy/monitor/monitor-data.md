@@ -1,34 +1,34 @@
-## 监控数据的获取
-* 你可以请求proxy的console（一个简单的http-server）来获取，默认端口是16379，具体接口是http://127.0.0.1:16379/monitor   
-* /monitor获取的监控数据的刷新周期取决于application.yml里的monitor-interval-seconds配置  
-* /monitor获取到的监控数据是一个json，如[示例](monitor.json)
-## monitor.json字段含义解析
-```
+## Monitoring data acquisition
+* You can request proxy's console (a simple http-server) to get it, the default port is 16379, and the specific interface is http://127.0.0.1:16379/monitor
+* The refresh cycle of the monitoring data obtained by /monitor depends on the monitor-interval-seconds configuration in application.yml
+* The monitoring data obtained by /monitor is a json, such as [example](monitor.json)
+## monitor.json field meaning analysis
+````
 {
   "connectStats": [
     {
-      "connect": 53  //客户端连接数，虽然是一个数组，但是其实只有一个
+      "connect": 53 //The number of client connections, although it is an array, there is actually only one
     }
   ],
   "countStats": [
     {
-      "count": 422214,  //总请求量
-      "totalReadCount": 207582,  //读请求量
-      "totalWriteCount": 214632  //写请求量
+      "count": 422214, //Total requests
+      "totalReadCount": 207582, //Number of read requests
+      "totalWriteCount": 214632 //Number of write requests
     }
   ],
   "qpsStats": [
     {
-      "qps": 7036.9,   //总qps
-      "writeQps": 3577.2,  //写qps
-      "readQps": 3459.7  //读qps
+      "qps": 7036.9, //Total qps
+      "writeQps": 3577.2, //write qps
+      "readQps": 3459.7 //Read qps
     }
   ],
-  "total": [ //各命令的请求量、qps
+  "total": [ //Request amount, qps of each command
     {
       "qps": 2389.483333333333, //qps
-      "count": 143369,  //请求量
-      "command": "hgetall"  //命令
+      "count": 143369, //request amount
+      "command": "hgetall" //command
     },
     {
       "qps": 0.03333333333333333,
@@ -36,12 +36,12 @@
       "command": "auth"
     }
   ],
-  "bidbgroup": [  //各业务的请求量、qps，按bid/bgroup来划分业务
+  "bidbgroup": [ //The request volume and qps of each business, divide the business according to bid/bgroup
     {
-      "qps": 0.05,  //qps
-      "bgroup": "default",  //bgroup
-      "count": 3,  //请求量
-      "bid": "35"  //bid
+      "qps": 0.05, //qps
+      "bgroup": "default", //bgroup
+      "count": 3, //request amount
+      "bid": "35" //bid
     },
     {
       "qps": 0.06666666666666667,
@@ -50,28 +50,28 @@
       "bid": "default"
     }
   ],
-  "detail": [ //各业务下各个命令的请求量、qps
+  "detail": [ //The request volume and qps of each command under each business
     {
       "qps": 180.18333333333334, //qps
       "bgroup": "default", //bgroup
-      "count": 10811,    //请求量
-      "bid": "3",        //bid
-      "command": "hget"  //命令
+      "count": 10811, //request amount
+      "bid": "3", //bid
+      "command": "hget" //command
     },
     {
-      "qps": 0.016666666666666666,
+      "qps": 0.0166666666666666666,
       "bgroup": "default",
       "count": 1,
       "bid": "35",
       "command": "zrangebyscore"
     }
   ],
-  "spendStats": [ //耗时监控
+  "spendStats": [ //Time-consuming monitoring
     {
-      "maxSpendMs": 16.464333,  //最大rt
-      "count": 143565,  //请求数
-      "avgSpendMs": 1.1236299562985408,  //平均rt
-      "command": "hgetall"  //命令
+      "maxSpendMs": 16.464333, //Maximum rt
+      "count": 143565, //Number of requests
+      "avgSpendMs": 1.1236299562985408, //average rt
+      "command": "hgetall" //command
     },
     {
       "maxSpendMs": 0.041476,
@@ -80,9 +80,9 @@
       "command": "ping"
     }
   ],
-  "bidBgroupSpendStats": [//按照业务统计的耗时监控
+  "bidBgroupSpendStats": [//Time-consuming monitoring according to business statistics
     {
-      "bgroup": "default",  
+      "bgroup": "default",
       "maxSpendMs": 7.929259,
       "count": 263,
       "bid": 9,
@@ -98,53 +98,53 @@
       "command": "hget"
     }
   ],
-  "failStats": [ //失败监控
+  "failStats": [ //Fail monitoring
     {
-      "reason": "xxx",  //原因
-      "count": 2  //数量
+      "reason": "xxx", //reason
+      "count": 2 //Number
     }
   ],
-  "slowCommandStats": [ //慢查询监控
-    //特别的，你可以通过在camellia-redis-proxy.propertis里配置slow.command.monitor.json.max.count=100来限制该监控数据项的最大个数，默认100个
+  "slowCommandStats": [ //Slow query monitoring
+    //Specially, you can limit the maximum number of monitoring data items by configuring slow.command.monitor.json.max.count=100 in camellia-redis-proxy.propertis, the default is 100
     {
-      "bgroup": "default",  //bgroup
-      "bid": "1",   //bid，如果没有使用camellia-dashboard，而是使用了local配置，则bid=default/bgroup=default
-      "command": "mget",  //命令
-      "keys": "k1,k2,k3",  //涉及的key列表，逗号分隔
-      "spendMillis": 10200,  //耗时
-      "thresholdMillis":1000  //慢查询的阈值
+      "bgroup": "default", //bgroup
+      "bid": "1", //bid, if the camellia-dashboard is not used, but the local configuration is used, bid=default/bgroup=default
+      "command": "mget", //command
+      "keys": "k1,k2,k3", //The list of keys involved, comma separated
+      "spendMillis": 10200, //time-consuming
+      "thresholdMillis":1000 //The threshold of slow query
     },
     {
-      "bgroup": "default",  
+      "bgroup": "default",
       "bid": "1",
       "command": "hgetall",
       "keys": "kkk",
       "spendMillis": 10200,
-      "thresholdMillis":1000
+      "thresholdMillis": 1000
     }],
-  "hotKeyStats": [ //热key监控
+  "hotKeyStats": [ //Hot key monitoring
     {
-      "times": 1,  //超过阈值的次数
-      "avg": 101.0,  //超过阈值的N个周期中，所有周期的平均请求量
-      "max": 101,  //超过阈值的N个周期中，请求量最大的那个周期的请求数
+      "times": 1, // times the threshold is exceeded
+      "avg": 101.0, //In the N cycles exceeding the threshold, the average request volume of all cycles
+      "max": 101, //The number of requests in the cycle with the largest amount of requests in the N cycles exceeding the threshold
       "bgroup": "default", //bgroup
-      "count": 101, //超过阈值的N个周期的请求量之和
-      "checkMillis": 1000, //检查周期
+      "count": 101, //sum of N cycles of requests exceeding the threshold
+      "checkMillis": 1000, //check cycle
       "bid": "1", //bid
       "key": "dao_c|kfk_tpc_.23380.", //key
-      "checkThreshold": 100  //检查阈值，在检查周期内请求数量超过该阈值，则认为是热key，times会+1
+      "checkThreshold": 100 //Check threshold, if the number of requests exceeds the threshold during the check period, it is considered a hot key, and times will be +1
     }
   ],
-  "bigKeyStats": [  //大key监控
-    //特别的，你可以通过在camellia-redis-proxy.propertis里配置big.key.monitor.json.max.count=10000来限制该监控数据项的最大个数，默认限制100，一般来说，更好的方式是通过调整更合适的大key检测阈值来减少数据项
+  "bigKeyStats": [ //Big key monitoring
+    //Specially, you can limit the maximum number of monitoring data items by configuring big.key.monitor.json.max.count=10000 in camellia-redis-proxy.propertis. The default limit is 100. Generally speaking, A better way is to reduce the data items by adjusting a more appropriate large key detection threshold
     {
-      "commandType": "ZSET",  //key的类型，包括STRING/ZSET/SET/LIST/HASH等
-      "size": 1903,  //大小
-      "bgroup": "default",  //bgroup
-      "threshold": 1000,  //阈值
-      "bid": "16",  //bid，如果没有使用camellia-dashboard，而是使用了local配置，则bid=default/bgroup=default
-      "command": "zrangebyscore", //命令
-      "key": "saaaaa" //涉及的key
+      "commandType": "ZSET", //type of key, including STRING/ZSET/SET/LIST/HASH, etc.
+      "size": 1903, //size
+      "bgroup": "default", //bgroup
+      "threshold": 1000, //threshold
+      "bid": "16", //bid, if the camellia-dashboard is not used, but the local configuration is used, bid=default/bgroup=default
+      "command": "zrangebyscore", //command
+      "key": "saaaaa" //The key involved
     },
     {
       "commandType": "SET",
@@ -156,14 +156,14 @@
       "key": "ssasas"
     }
   ],
-  "hotKeyCacheStats": [   //热key缓存监控
+  "hotKeyCacheStats": [ //Hot key cache monitoring
     {
-      "bid": "1",  //bid
-      "bgroup": "default",  //bgroup
-      "key": "xxxx",  //涉及的key
-      "hitCount": 49,  //缓存命中次数
-      "checkMillis": 1000,  //检查周期
-      "checkThreshold": 100  //检查阈值，在检查周期内，请求次数超过该阈值，则下一次请求会被缓存直接命中
+      "bid": "1", //bid
+      "bgroup": "default", //bgroup
+      "key": "xxxx", //the key involved
+      "hitCount": 49, //Number of cache hits
+      "checkMillis": 1000, //check cycle
+      "checkThreshold": 100 //Check threshold. During the check period, if the number of requests exceeds this threshold, the next request will be directly hit by the cache
     },
     {
       "hitCount": 459,
@@ -174,12 +174,12 @@
       "checkThreshold": 100
     }
   ],
-  "routeConf": [ //当前路由表
+  "routeConf": [ //Current routing table
     {
       "bgroup": "default",
-      "updateTime": "2021-04-29 10:52:01",  //若重启proxy，updateTime会重置为当前时间
+      "updateTime": "2021-04-29 10:52:01", //If the proxy is restarted, updateTime will be reset to the current time
       "bid": 1,
-      "resourceTable": "{\"type\":\"simple\",\"operation\":{\"read\":\"redis-sentinel-slaves://passwd123@127.0.0.1:26379/master?withMaster=true\",\"type\":\"rw_separate\",\"write\":\"redis-sentinel://passwd123@127.0.0.1:26379/master\"}}"
+      "resourceTable": "{\"type\":\"simple\",\"operation\":{\"read\":\"redis-sentinel-slaves://passwd123@127.0.0.1:26379/master ?withMaster=true\",\"type\":\"rw_separate\",\"write\":\"redis-sentinel://passwd123@127.0.0.1:26379/master\"}}"
     },
     {
       "bgroup": "default",
@@ -188,7 +188,7 @@
       "resourceTable": "redis://passwd123@127.0.0.1:6379"
     }
   ],
-  "resourceBidBgroupCommandStats": [  //根据业务统计的命令级别的路由统计
+  "resourceBidBgroupCommandStats": [ //Command-level routing statistics based on business statistics
     {
       "resource": "redis://passwd123@127.0.0.1:6379",
       "qps": 0.4,
@@ -206,13 +206,13 @@
       "command": "hget"
     }
   ],
-  "resourceCommandStats": [  //路由统计（命令）
+  "resourceCommandStats": [ //Route statistics (command)
     {
       "resource": "redis-sentinel-slaves://passwd123@127.0.0.1:26379/master?withMaster=true",
       "qps": 238.61666666666667,
       "count": 14317,
       "command": "get"
-    }, 
+    },
     {
       "resource": "redis://passwd123@127.0.0.1:6379",
       "qps": 63.9,
@@ -220,7 +220,7 @@
       "command": "setex"
     }
   ],
-  "resourceStats": [  //路由统计
+  "resourceStats": [ //Route statistics
     {
       "resource": "redis://passwd123@127.0.0.1:6379",
       "qps": 196.28333333333333,
@@ -232,7 +232,7 @@
       "count": 24259
     }
   ],
-  "resourceBidBgroupStats": [ //业务路由统计
+  "resourceBidBgroupStats": [ //Business routing statistics
     {
       "resource": "redis-sentinel-slaves://passwd123@127.0.0.1:26379/master?withMaster=true",
       "qps": 404.31666666666666,
@@ -248,12 +248,12 @@
       "bid": 1
     }
   ],
-  "redisConnectStats": [ //到后端redis的总连接数
+  "redisConnectStats": [ //Total number of connections to backend redis
     {
       "connect": 16
     }
   ],
-  "redisConnectDetailStats": [//到后端各个redis的连接数
+  "redisConnectDetailStats": [//Number of connections to each redis in the backend
     {
       "addr": "@10.177.0.69:8803",
       "connect": 4
@@ -263,7 +263,7 @@
       "connect": 4
     }
   ],
-  "upstreamRedisSpendStats": [//后端redis的响应时间
+  "upstreamRedisSpendStats": [//Response time of backend redis
     {
       "maxSpendMs": 8.689271,
       "count": 184,
@@ -278,4 +278,4 @@
     }
   ]
 }
-```
+````
