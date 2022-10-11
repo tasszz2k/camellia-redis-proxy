@@ -65,7 +65,7 @@
     </dependencyManagement>
 
     <dependencies>
-        <!--避免被spring-boot-dependencies给覆盖了版本-->
+        <!--Avoid being overwritten by spring-boot-dependencies-->
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
