@@ -20,16 +20,16 @@ camellia-redis-proxy:
     local:
       type: simple
       resource: redis://@127.0.0.1:6379 #Forwarded redis address
-# resource: redis-sentinel://@127.0.0.1:26379/master1
-# resource: redis-sentinel-slaves://@127.0.0.1:26379/master1
-# resource: redis-cluster://@nim-redis-perftest-jd-1.v1.yunxin.jd1.vpc:7000,nim-redis-perftest-jd-2.v1.yunxin.jd1.vpc:7006, nim-redis-perftest-jd-3.v1.yunxin.jd1.vpc:7010
-# type: complex
-# json-file: resource-table.json
-# redis-conf:
-# multi-write-mode: first_resource_only #Double write mode, by default the first address will be returned
-# close-idle-connection: true #Whether to close idle connections, the default is true
-# check-idle-connection-threshold-seconds: 600 #How long to count an idle connection, the default is 600s
-# preheat: true #Preheat switch
+#      resource: redis-sentinel://@127.0.0.1:26379/master1
+#      resource: redis-sentinel-slaves://@127.0.0.1:26379/master1
+#      resource: redis-cluster://@nim-redis-perftest-jd-1.v1.yunxin.jd1.vpc:7000,nim-redis-perftest-jd-2.v1.yunxin.jd1.vpc:7006, nim-redis-perftest-jd-3.v1.yunxin.jd1.vpc:7010
+#      type: complex
+#      json-file: resource-table.json
+#    redis-conf:
+#      multi-write-mode: first_resource_only #Double write mode, by default the first address will be returned
+#      close-idle-connection: true #Whether to close idle connections, the default is true
+#      check-idle-connection-threshold-seconds: 600 #How long to count an idle connection, the default is 600s
+#      preheat: true #Preheat switch
 
 
 camellia-redis-zk-registry:
