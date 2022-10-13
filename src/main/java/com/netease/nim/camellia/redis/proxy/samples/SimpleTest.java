@@ -25,6 +25,7 @@ public class SimpleTest {
         plugins.add(BuildInProxyPluginEnum.MONITOR_PLUGIN.getAlias());
         plugins.add(BuildInProxyPluginEnum.BIG_KEY_PLUGIN.getAlias());
         plugins.add(BuildInProxyPluginEnum.HOT_KEY_PLUGIN.getAlias());
+        plugins.add(BuildInProxyPluginEnum.CONVERTER_PLUGIN.getAlias());
         //Other parameter settings....
 
         //start up

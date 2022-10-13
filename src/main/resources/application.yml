@@ -15,6 +15,7 @@ camellia-redis-proxy:
     - monitorPlugin
     - bigKeyPlugin
     - hotKeyPlugin
+    - converterPlugin
   transpond:
     type: local #Use local configuration
     local:

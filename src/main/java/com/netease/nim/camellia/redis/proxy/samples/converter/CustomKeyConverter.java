@@ -10,28 +10,21 @@ import com.netease.nim.camellia.redis.proxy.util.Utils;
  */
 public class CustomKeyConverter implements KeyConverter {
 
-    private static final byte[] prefix = Utils.stringToBytes("v1");
-
     @Override
     public byte[] convert(CommandContext commandContext, RedisCommand redisCommand, byte[] originalKey) {
-        byte[] result = new byte[prefix.length + originalKey.length];
-        System.arraycopy(prefix, 0, result, 0, prefix.length);
-        System.arraycopy(originalKey, 0, result, prefix.length, originalKey.length);
-        return result;
+        long bid = commandContext.getBid();
+        String bgroup = commandContext.getBgroup();
+        String originalKeyStr = Utils.bytesToString(originalKey);
+        String convertedKeyStr = String.format("%d:%s:%s", bid, bgroup, originalKeyStr);
+        return Utils.stringToBytes(convertedKeyStr);
     }
 
     @Override
     public byte[] reverseConvert(CommandContext commandContext, RedisCommand redisCommand, byte[] convertedKey) {
-        if (convertedKey.length > prefix.length) {
-            for (int i=0; i<prefix.length; i++) {
-                if (prefix[i] != convertedKey[i]) {
-                    return convertedKey;
-                }
-            }
-            byte[] result = new byte[convertedKey.length - prefix.length];
-            System.arraycopy(convertedKey, prefix.length, result, 0, result.length);
-            return result;
-        }
-        return convertedKey;
+        long bid = commandContext.getBid();
+        String bgroup = commandContext.getBgroup();
+        String convertedKeyStr = Utils.bytesToString(convertedKey);
+        String originalKeyStr = convertedKeyStr.substring(String.format("%d:%s:", bid, bgroup).length());
+        return Utils.stringToBytes(originalKeyStr);
     }
 }
