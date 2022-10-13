@@ -10,27 +10,30 @@ import com.netease.nim.camellia.redis.proxy.util.Utils;
  */
 public class CustomKeyConverter implements KeyConverter {
 
+    public static final String CONVERTED_KEY_FORMAT = "%d|%s|%s";
+    public static final String CONVERTED_KEY_WITHOUT_ORIGIN_KEY_FORMAT = "%d|%s|";
+
     @Override
     public byte[] convert(CommandContext commandContext, RedisCommand redisCommand, byte[] originalKey) {
-        if (commandContext.getBid() != null || commandContext.getBgroup() == null) {
+        if (commandContext.getBid() == null || commandContext.getBgroup() == null) {
             return originalKey; // TODO: change logic here
         }
         long bid = commandContext.getBid();
         String bgroup = commandContext.getBgroup();
         String originalKeyStr = Utils.bytesToString(originalKey);
-        String convertedKeyStr = String.format("%d:%s:%s", bid, bgroup, originalKeyStr);
+        String convertedKeyStr = String.format(CONVERTED_KEY_FORMAT, bid, bgroup, originalKeyStr);
         return Utils.stringToBytes(convertedKeyStr);
     }
 
     @Override
     public byte[] reverseConvert(CommandContext commandContext, RedisCommand redisCommand, byte[] convertedKey) {
-        if (commandContext.getBid() != null || commandContext.getBgroup() == null) {
+        if (commandContext.getBid() == null || commandContext.getBgroup() == null) {
             return convertedKey; // TODO: change logic here
         }
         long bid = commandContext.getBid();
         String bgroup = commandContext.getBgroup();
         String convertedKeyStr = Utils.bytesToString(convertedKey);
-        String originalKeyStr = convertedKeyStr.substring(String.format("%d:%s:", bid, bgroup).length());
+        String originalKeyStr = convertedKeyStr.substring(String.format(CONVERTED_KEY_WITHOUT_ORIGIN_KEY_FORMAT, bid, bgroup).length());
         return Utils.stringToBytes(originalKeyStr);
     }
 }

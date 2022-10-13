@@ -11,6 +11,7 @@ camellia-redis-proxy:
   password: pass123 #proxy password, if a custom client-auth-provider-class-name is set, the password parameter is invalid
   monitor-enable: false #Whether to enable monitoring
   monitor-interval-seconds: 60 #Monitor callback interval
+  client-auth-provider-class-name: com.netease.nim.camellia.redis.proxy.auth.DynamicConfClientAuthProvider
   plugins: #
     - monitorPlugin
     - bigKeyPlugin
@@ -34,7 +35,7 @@ camellia-redis-proxy:
       check-interval-millis: 5000 # Polling period to camellia-dashboard
       dynamic: true # indicates that multiple sets of configurations are supported, the default is true
       bid: 1 #The default bid, the bgroup used when the client does not declare its own bid and bgroup when requesting, can be the default, if the default, the request without bid/bgroup will be rejected
-      bgroup: group6377 #The default bgroup, the bgroup used when the client does not declare its own bid and bgroup when requesting, can be the default, if the default, the request without bid/bgroup will be rejected
+      bgroup: default #The default bgroup, the bgroup used when the client does not declare its own bid and bgroup when requesting, can be the default, if the default, the request without bid/bgroup will be rejected
 #    redis-conf:
 #      multi-write-mode: first_resource_only #Double write mode, by default the first address will be returned
 #      close-idle-connection: true #Whether to close idle connections, the default is true
