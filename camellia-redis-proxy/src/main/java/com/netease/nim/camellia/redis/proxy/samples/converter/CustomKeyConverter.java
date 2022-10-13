@@ -12,6 +12,9 @@ public class CustomKeyConverter implements KeyConverter {
 
     @Override
     public byte[] convert(CommandContext commandContext, RedisCommand redisCommand, byte[] originalKey) {
+        if (commandContext.getBid() != null || commandContext.getBgroup() == null) {
+            return originalKey; // TODO: change logic here
+        }
         long bid = commandContext.getBid();
         String bgroup = commandContext.getBgroup();
         String originalKeyStr = Utils.bytesToString(originalKey);
@@ -21,6 +24,9 @@ public class CustomKeyConverter implements KeyConverter {
 
     @Override
     public byte[] reverseConvert(CommandContext commandContext, RedisCommand redisCommand, byte[] convertedKey) {
+        if (commandContext.getBid() != null || commandContext.getBgroup() == null) {
+            return convertedKey; // TODO: change logic here
+        }
         long bid = commandContext.getBid();
         String bgroup = commandContext.getBgroup();
         String convertedKeyStr = Utils.bytesToString(convertedKey);

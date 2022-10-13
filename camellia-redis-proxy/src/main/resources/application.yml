@@ -17,15 +17,24 @@ camellia-redis-proxy:
     - hotKeyPlugin
     - converterPlugin
   transpond:
-    type: local #Use local configuration
-    local:
-      type: simple
-      resource: redis://@127.0.0.1:6379 #Forwarded redis address
+## ------ use local configuration -------------
+#    type: local #Use local configuration
+#    local:
+#      type: simple
+#      resource: redis://@127.0.0.1:6379 #Forwarded redis address
 #      resource: redis-sentinel://@127.0.0.1:26379/master1
 #      resource: redis-sentinel-slaves://@127.0.0.1:26379/master1
 #      resource: redis-cluster://@nim-redis-perftest-jd-1.v1.yunxin.jd1.vpc:7000,nim-redis-perftest-jd-2.v1.yunxin.jd1.vpc:7006, nim-redis-perftest-jd-3.v1.yunxin.jd1.vpc:7010
 #      type: complex
 #      json-file: resource-table.json
+## ------ use remote configuration -------------
+    type: remote
+    remote:
+      url: http://127.0.0.1:8080 #camellia-dashboard's address
+      check-interval-millis: 5000 # Polling period to camellia-dashboard
+      dynamic: true # indicates that multiple sets of configurations are supported, the default is true
+      bid: 1 #The default bid, the bgroup used when the client does not declare its own bid and bgroup when requesting, can be the default, if the default, the request without bid/bgroup will be rejected
+      bgroup: group6377 #The default bgroup, the bgroup used when the client does not declare its own bid and bgroup when requesting, can be the default, if the default, the request without bid/bgroup will be rejected
 #    redis-conf:
 #      multi-write-mode: first_resource_only #Double write mode, by default the first address will be returned
 #      close-idle-connection: true #Whether to close idle connections, the default is true
