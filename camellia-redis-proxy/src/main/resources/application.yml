@@ -11,7 +11,7 @@ camellia-redis-proxy:
   password: pass123 #proxy password, if a custom client-auth-provider-class-name is set, the password parameter is invalid
   monitor-enable: false #Whether to enable monitoring
   monitor-interval-seconds: 60 #Monitor callback interval
-  client-auth-provider-class-name: com.netease.nim.camellia.redis.proxy.auth.DynamicConfClientAuthProvider
+  client-auth-provider-class-name: com.netease.nim.camellia.redis.proxy.samples.auth.MockClientAuthProvider
   plugins: #
     - monitorPlugin
     - bigKeyPlugin
