@@ -13,14 +13,18 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 COPY ./pom.xml ./pom.xml
 COPY ./src ./src
 
-RUN mvn clean install
+# To resolve dependencies in a safe way (no re-download when the source code changes)
+RUN mvn clean package -Dmaven.main.skip -Dmaven.test.skip && rm -r target
+# To package the application
+RUN mvn clean package -Dmaven.test.skip
+#RUN --mount=type=cache,target=/root/.m2 mvn clean package  -Dmaven.test.skip
 
 FROM openjdk:8-jre-alpine
 
 # This is the directory where the output of CMD should run
 WORKDIR $APP_HOME
 
-COPY --from=builder $JAR_FILE ./camellia-redis-proxy.jar
+COPY --from=builder $JAR_FILE ./camellia-dashboard.jar
 EXPOSE $PORT
 
-CMD ["java", "-jar", "./camellia-redis-proxy.jar"]
+CMD ["java", "-jar", "./camellia-dashboard.jar"]

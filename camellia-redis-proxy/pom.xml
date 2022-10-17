@@ -3,10 +3,8 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.example</groupId>
     <artifactId>camellia-redis-proxy</artifactId>
-    <packaging>war</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <name>camellia-redis-proxy</name>
-    <url>http://maven.apache.org</url>
     <parent>
         <groupId>com.netease.nim</groupId>
         <artifactId>camellia-samples</artifactId>
